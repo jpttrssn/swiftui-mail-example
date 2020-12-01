@@ -62,7 +62,7 @@ struct Inbox: View {
     
     var body: some View {
         List(mailStore[folder, default: []], id: \.self) { mail in
-            NavigationLink(destination: Detail()) {
+            NavigationLink(destination: Detail(selectedMail: mail)) {
                 VStack(alignment: .leading) {
                     HStack {
                         Text("\(mail.name)")
@@ -115,8 +115,35 @@ struct Inbox: View {
 }
 
 struct Detail: View {
+    @State var selectedMail: Mail?
+    
     var body: some View {
-        Text("Detail")
+        if let mail = selectedMail {
+            VStack(alignment: .leading) {
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("\(mail.name)")
+                            .font(.headline)
+                        Spacer()
+                        Text("\(mail.date, formatter: dateFormatter)")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    Text("\(mail.title)")
+                        .font(.subheadline)
+                    HStack {
+                        Text("To:")
+                        Text("\(mail.address)")
+                    }
+                    HStack {
+                        Text("Reply-To:")
+                        Text("customer.service@example.com")
+                    }
+                    Divider()
+                }
+                Text("\(mail.body)")
+                Spacer()
+            }
             .padding()
             .toolbar(content: {
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -128,11 +155,19 @@ struct Detail: View {
                         Image(systemName: "trash")
                     }
                 }
-                    
-                
-                        
             })
+        } else {
+            Text("No Message Selected")
+                .font(.title)
+                .foregroundColor(.gray)
+        }
     }
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        formatter.timeStyle = .short
+        return formatter
+    }()
 }
 
 struct Mail: Hashable {
