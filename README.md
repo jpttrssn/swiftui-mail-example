@@ -1,4 +1,4 @@
-# SwfitUI Apple Mail Example
+# SwiftUI Apple Mail Example
 This is a work in progress.
 
 ## Known Issues
