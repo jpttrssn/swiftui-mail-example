@@ -7,4 +7,4 @@ This is a work in progress...
 * Smart Mailboxes hover doesn't have the exact correct behaviour
 * Toolbar is doing funky things when selecting and unselecting emails, such as:
   * Sometimes drawing buttons twice
-  * Somestimes not drawing buttons at all
+  * Sometimes not drawing buttons at all
