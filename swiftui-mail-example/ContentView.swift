@@ -8,27 +8,54 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State var selectedFolder: String? = "Inbox"
+    @State var selectedMail: String? = nil
+    
     var body: some View {
         NavigationView {
-            Sidebar()
-            Inbox()
-            Detail()
+            Sidebar(selectedFolder: $selectedFolder, selectedMail: $selectedMail)
+            if selectedFolder == nil {
+                Text("No Folder Selected")
+                    .font(.title)
+                    .toolbar(content: {
+                        ToolbarItemGroup(placement: .primaryAction) {
+                            Spacer()
+                        }
+                    })
+            }
+            if selectedMail == nil {
+                Text("No Message Selected")
+                    .font(.title)
+                    .toolbar(content: {
+                        ToolbarItemGroup(placement: .primaryAction) {
+                            Button(action: {}) {
+                                Image(systemName: "envelope")
+                            }
+                            Button(action: {}) {
+                                Image(systemName: "square.and.pencil")
+                            }
+                        }
+                    })
+            }
         }
     }
 }
 
 struct Sidebar: View {
     @State var smartMailboxHover = false
+    @Binding var selectedFolder: String?
+    @Binding var selectedMail: String?
+    
     var body: some View {
         List() {
             Section(header: Text("Favourites")) {
-                NavigationLink(destination: Inbox(folder: "Inbox")) {
+                NavigationLink(destination: Inbox(folder: "Inbox", selectedMail: $selectedMail), tag: "Inbox", selection: $selectedFolder) {
                     Label("Inbox", systemImage: "tray")
                 }
-                NavigationLink(destination: Inbox(folder: "Sent")) {
+                NavigationLink(destination: Inbox(folder: "Sent", selectedMail: $selectedMail), tag: "Sent", selection: $selectedFolder) {
                     Label("Sent", systemImage: "paperplane")
                 }
-                NavigationLink(destination: Inbox(folder: "Drafts")) {
+                NavigationLink(destination: Inbox(folder: "Drafts", selectedMail: $selectedMail), tag: "Drafts", selection: $selectedFolder) {
                     Label("Drafts", systemImage: "doc")
                 }
             }
@@ -46,23 +73,24 @@ struct Sidebar: View {
                 })
             
             ) {
-                NavigationLink(destination: Inbox()) {
+                NavigationLink(destination: Inbox(selectedMail: $selectedMail)) {
                     Label("Today", systemImage: "gearshape")
                         .accentColor(.gray)
                 }
             }
         }
-        .frame(idealWidth: 175)
+        .listStyle(SidebarListStyle())
+        .frame(minWidth: 100, idealWidth: 150, maxWidth: 200, maxHeight: .infinity)
     }
-    
 }
 
 struct Inbox: View {
     @State var folder: String = "Inbox"
+    @Binding var selectedMail: String?
     
     var body: some View {
-        List(mailStore[folder, default: []], id: \.self) { mail in
-            NavigationLink(destination: Detail(selectedMail: mail)) {
+        List(mailStore[folder, default: []], id: \.self, selection: $selectedMail) { mail in
+            NavigationLink(destination: Detail(mail: mail)) {
                 VStack(alignment: .leading) {
                     HStack {
                         Text("\(mail.name)")
@@ -98,13 +126,11 @@ struct Inbox: View {
                     Image(systemName: "line.horizontal.3.decrease.circle")
                 }
             }
-            ToolbarItem(placement: .primaryAction) {
-                Button(action: {}) {
-                    Image(systemName: "square.and.arrow.down")
-                }
-            }
         })
+        .listStyle(InsetListStyle())
     }
+        
+        
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -115,10 +141,9 @@ struct Inbox: View {
 }
 
 struct Detail: View {
-    @State var selectedMail: Mail?
+    @State var mail: Mail
     
     var body: some View {
-        if let mail = selectedMail {
             VStack(alignment: .leading) {
                 VStack(alignment: .leading) {
                     HStack {
@@ -145,22 +170,31 @@ struct Detail: View {
                 Spacer()
             }
             .padding()
+            .navigationTitle(mail.title)
             .toolbar(content: {
                 ToolbarItemGroup(placement: .primaryAction) {
-                    Spacer()
                     Button(action: {}) {
-                        Image(systemName: "square.and.arrow.up")
+                        Image(systemName: "envelope")
                     }
                     Button(action: {}) {
-                        Image(systemName: "trash")
+                        Image(systemName: "square.and.pencil")
+                    }
+                    Spacer()
+                    HStack {
+                        Button(action: {}) {
+                            Image(systemName: "archivebox")
+                        }
+                        Divider()
+                        Button(action: {}) {
+                            Image(systemName: "trash")
+                        }
+                        Divider()
+                        Button(action: {}) {
+                            Image(systemName: "xmark.bin")
+                        }
                     }
                 }
             })
-        } else {
-            Text("No Message Selected")
-                .font(.title)
-                .foregroundColor(.gray)
-        }
     }
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
